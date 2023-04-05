@@ -15,7 +15,6 @@ public class InitialMenu : MonoBehaviour
 	}
 
 	public void Exit(){
-		Debug.Log("Saliendo...");
-		Application.Quit();
+		SceneManager.LoadScene("Credits");
 	}
 }
