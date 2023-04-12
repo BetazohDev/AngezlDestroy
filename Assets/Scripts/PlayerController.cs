@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Character1 : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float speed; 
     public bool atacando;
@@ -18,17 +18,19 @@ public class Character1 : MonoBehaviour
     public float AlturaSalto;
     public float PotenciaSalto;
     public float Fallen;
-
-
+	
     public SpriteRenderer spr;
     private float delay;
     private int sky;
-
+    public Collider2D boundsCollider;
+    private Vector3 lastPosition;
+	
     // Start is called before the first frame update
     void Start()
     {
         ani = GetComponent<Animator>();
         spr = GetComponent<SpriteRenderer>();
+	  lastPosition = transform.position;
     }
 
     public void Mover()
@@ -223,6 +225,50 @@ void FixedUpdate()
 {
     Mover();
     transform.Translate(Vector3.up * Gravedad * Time.deltaTime);
+
+            Vector3 newPosition = transform.position;
+        Vector3 moveDirection = newPosition - lastPosition;
+
+        float halfWidth = GetComponent<Collider2D>().bounds.extents.x;
+
+        if (boundsCollider.bounds.Contains(newPosition)) {
+            lastPosition = newPosition;
+        } else {
+            // Si el personaje se mueve en la dirección de un borde del collider, establece su posición en la posición más cercana al borde.
+            if (moveDirection.x > 0) {
+                newPosition.x = Mathf.Min(newPosition.x, boundsCollider.bounds.max.x - halfWidth);
+            } else if (moveDirection.x < 0) {
+                newPosition.x = Mathf.Max(newPosition.x, boundsCollider.bounds.min.x + halfWidth);
+            }
+
+            if (moveDirection.y > 0) {
+                newPosition.y = Mathf.Min(newPosition.y, boundsCollider.bounds.max.y - halfWidth);
+            } else if (moveDirection.y < 0) {
+                newPosition.y = Mathf.Max(newPosition.y, boundsCollider.bounds.min.y + halfWidth);
+            }
+
+            transform.position = newPosition;
+            lastPosition = transform.position;
+        }
+}
+    
 }
 
+/*
+
+public void TakeDamage(int damage)
+{
+    currentHealth -= damage; // restar el daño a la salud actual del jugador
+
+    if (currentHealth <= 0) // si la salud actual del jugador llega a cero
+    {
+        Die(); // llamar a la función Die para terminar el juego
+    }
 }
+
+private void Die()
+{
+    // aquí se podría implementar alguna animación o efecto visual para la muerte del jugador
+    Debug.Log("Game Over"); // mostrar un mensaje en la consola
+    Time.timeScale = 0; // detener el tiempo del juego
+}*/
